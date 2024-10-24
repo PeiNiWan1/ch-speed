@@ -83,6 +83,8 @@ REST_FRAMEWORK = {
     ],
     'EXCEPTION_HANDLER': 'ChSpeed.exceptions.BaseExceptions.baseExceptionHandler',
     'DEFAULT_RENDERER_CLASSES': ['ChSpeed.renderer.response.CustomRenderer'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,  # 默认每页10条
 }
 
 # Database
