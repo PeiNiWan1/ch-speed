@@ -29,6 +29,9 @@ class LoginView(generics.GenericAPIView):
         if not user:
             Loggers.info(serializer.data['phone'],"用户不存在")
             return Response({"msg":"用户不存在","code":4004})
+        if not user.check_password(serializer.data['password']):
+            Loggers.info(serializer.data['phone'],"密码错误")
+            return Response({"msg":"密码错误","code":4004})
         _, token = AuthToken.objects.create(user)
         return Response({
             "user": self.get_serializer(user).data,
