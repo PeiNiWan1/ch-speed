@@ -28,7 +28,7 @@ class LoginView(generics.GenericAPIView):
         user = get_user_model().objects.filter(phone=serializer.data['phone']).first()
         if not user:
             Loggers.info(serializer.data['phone'],"用户不存在")
-            return Response({"msg":"用户不存在"})
+            return Response({"msg":"用户不存在","code":4004})
         _, token = AuthToken.objects.create(user)
         return Response({
             "user": self.get_serializer(user).data,
