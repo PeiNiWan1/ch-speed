@@ -12,7 +12,9 @@ class HasPerm(BasePermission):
         # 检查用户权限中是否拥有perm权限
         user = request.user
         allPerm= user.get_all_permissions()
-        print("检查权限",self.perm,self.perm in allPerm,allPerm)
+        print("用户权限",self.perm)
+        # if user.is_superuser:
+        #     return True
         if self.perm in allPerm:
             return True
         return False

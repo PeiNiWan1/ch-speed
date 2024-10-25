@@ -10,18 +10,9 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def _create_user(self, phone,email, password, **extra_fields):
-        """
-        Create and save a user with the given username, email, and password.
-        """
-
         email = self.normalize_email(email)
-        # Lookup the real model class from the global app registry so this
-        # manager method can be used in migrations. This is fine because
-        # managers are by definition working on the real model.
-
         print("创建用户",email,password,phone,extra_fields)
         user = self.model(phone=phone, email=email, **extra_fields)
-
         user.username = phone
         user.password =make_password(password)
         user.save(using=self._db)
@@ -82,7 +73,10 @@ class UserBaseModel(AbstractUser):
         db_table = "user_base"
 
     def __str__(self):
+
         return self.phone
 
 
 
+    def get_class_name(self):
+        return self.__class__.__name__

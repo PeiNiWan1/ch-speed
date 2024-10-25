@@ -1,6 +1,4 @@
-from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
-from rest_framework.filters import SearchFilter
 from ChSpeed.viewsets import CommonViewSetModel
 from base.serializers import UserSerializer
 from rest_framework.decorators import action
@@ -9,13 +7,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from knox.models import AuthToken
 from ChSpeed.loggers import Loggers
-
+from base.fitter import BaseUserFitter
 class UserView(CommonViewSetModel):
     queryset = get_user_model().objects.all()
     serializer_class=UserSerializer
-    filter_backends = [SearchFilter]
-    search_fields=['phone','username']
     permission_classes = [IsAuthenticated]
+    filterset_class=BaseUserFitter
     @action(detail=False,methods=['post'])
     def getMyInfo(self,request):
         print(request.user)

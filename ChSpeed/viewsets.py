@@ -8,8 +8,10 @@ from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from rest_framework.exceptions import ParseError,AuthenticationFailed
 from django.db import transaction
+from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import IsAdminUser
 
-from ChSpeed.permissions import HasPerm,IsAdminUser
+from ChSpeed.permissions import HasPerm
 class CommonViewSet(GenericViewSet):
     '''
     该视图类灵活配置权限映射
@@ -27,7 +29,7 @@ class CommonViewSet(GenericViewSet):
     }
     permission_classes=[IsAdminUser]
     # 前缀
-    permission_prefix = 'default'
+    permission_prefix = None
     def initial(self, request, *args, **kwargs):
         """重新定义此方法，添加灵活配置权限映射"""
         # 初始化默认权限
@@ -40,8 +42,6 @@ class CommonViewSet(GenericViewSet):
 
     # 初始化权限列表
     def initPermission(self,action):
-
-
         # 默认映射
         ActionMap={
             'list':'view',
@@ -53,11 +53,13 @@ class CommonViewSet(GenericViewSet):
         }
         if action not in ActionMap:
             return
-        self.permission_classes=['{}.{}_{}'.format(self.get_app_name(),ActionMap.get(action),self.permission_prefix)]
-
+        self.permission_classes = ['{}.{}_{}'.format(
+                    self.get_app_name(),
+                    ActionMap.get(action),
+                    self.permission_prefix or self.get_label_name()
+                )]
 
     def get_permissions(self):
-
         hasPermList= [item for item in self.permission_classes if isinstance(item, str)]
         classPermList = [item for item in self.permission_classes if not isinstance(item, str)]
         return [HasPerm(perm) for perm in hasPermList]+[perm() for perm in classPermList]
@@ -75,6 +77,10 @@ class CommonViewSet(GenericViewSet):
         if not self.app_name:
             return  self.__module__.split('.')[0]
         return self.app_name
+
+    def get_label_name(self):
+        return self.queryset.model.__name__.lower()
+
     def response_page(self,queryset,request):
         """
         快速分页方法，需要结果集和请求对象
