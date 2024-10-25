@@ -17,7 +17,7 @@ class BaseSerializer(ModelSerializer):
   exclude_list = []
 
   def __init__(self,instance=None,data=empty, **kwargs):
-    super().__init__(instance=None,data=empty, **kwargs)
+    super().__init__(instance=instance,data=data, **kwargs)
 
     if isinstance(instance,list) and self.display_type==None:
       self.display_type = DisplayType.LIST
