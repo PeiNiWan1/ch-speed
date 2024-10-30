@@ -8,15 +8,36 @@ from rest_framework import generics
 from knox.models import AuthToken
 from ChSpeed.loggers import Loggers
 from base.fitter import BaseUserFitter
+from django.contrib.auth.hashers import make_password
 class UserView(CommonViewSetModel):
     queryset = get_user_model().objects.all()
     serializer_class=UserSerializer
     permission_classes = [IsAuthenticated]
     filterset_class=BaseUserFitter
+    classes_map = {
+
+        # 'list':{'permissions':[],'serializer':None},
+        # 'retrieve':{'permissions':[],'serializer':None},
+        # 'create':{'permissions':[],'serializer':None},
+        # 'update':{'permissions':[],'serializer':None},
+        # 'partial_update':{'permissions':[],'serializer':None},
+        # 'destroy':{'permissions':[],'serializer':None},
+    }
     @action(detail=False,methods=['post'])
     def getMyInfo(self,request):
         print(request.user)
         return Response({"user":"awdawdaw"})
+    # 修改密码
+    @action(detail=False,methods=['post'])
+    def changePassword(self,request):
+        user = request.user
+        newpassword = request.data.get('newPassword')
+        oldpassword = request.data.get('oldPassword')
+        if not user.check_password(oldpassword):
+            return Response({"msg":"原密码错误","code":4004})
+        user.set_password(newpassword)
+        user.save()
+        return Response({"msg":"修改密码成功"})
 class LoginView(generics.GenericAPIView):
     serializer_class = UserSerializer
     def post(self, request, *args, **kwargs):
