@@ -65,6 +65,7 @@ class UserManager(BaseUserManager):
 class UserBaseModel(AbstractUser):
     phone = models.CharField("phone",max_length=11, null=False, blank=True,unique=True)
     username = models.CharField("username",max_length=32,null=False, blank=True)
+    email=None
     objects = UserManager()
     USERNAME_FIELD='phone'
     REQUIRED_FIELDS =[]

@@ -4,6 +4,7 @@ from rest_framework.serializers import Serializer,CharField,ModelSerializer
 from django.contrib.auth.hashers import make_password
 class UserSerializer(ModelSerializer):
   phone = CharField(required=True)
+
   class Meta:
     model = UserBaseModel
     fields = '__all__'
