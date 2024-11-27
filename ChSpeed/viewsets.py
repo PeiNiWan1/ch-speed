@@ -131,9 +131,22 @@ class CommonViewSetModel(CommonViewSet,ModelViewSet,DeleteModelMixin,SaveModelMi
     `update()`,`partial_update()`, `destroy()`,
     `list()`,`delete()`,`save()`操作
     """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+    def paginate_queryset(self, queryset):
+        self.paginator.page_query_param="pageIndex"
+        return super().paginate_queryset(queryset)
+    def get_paginated_response(self, data):
+        self.paginator.page_query_param="pageIndex"
+        return super().get_paginated_response(data)
+
     def destroy(self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response()
+
 
 
 
