@@ -3,7 +3,8 @@ from ChSpeed.viewsets import CommonViewSetModel
 from base.serializers import UserSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
+from knox.views import LoginView as KnoxLoginView
 from rest_framework import generics
 from knox.models import AuthToken
 from ChSpeed.loggers import Loggers
@@ -38,11 +39,13 @@ class UserView(CommonViewSetModel):
         user.set_password(newpassword)
         user.save()
         return Response({"msg":"修改密码成功"})
-class LoginView(generics.GenericAPIView):
+class LoginView(KnoxLoginView,generics.CreateAPIView):
     serializer_class = UserSerializer
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        print(serializer.data)
         user = get_user_model().objects.filter(phone=serializer.data['phone']).first()
         if not user:
             Loggers.info(serializer.data['phone'],"用户不存在")
@@ -53,8 +56,21 @@ class LoginView(generics.GenericAPIView):
         if not user.is_active:
             Loggers.info(serializer.data['phone'],"用户被禁用")
             return Response({"msg":"用户被禁用","code":4004})
-        _, token = AuthToken.objects.create(user)
-        return Response({
-            "user": self.get_serializer(user).data,
-            "token": token
-        })
+        request.user = user
+        Loggers.info(user,"登录成功")
+        # _, token = AuthToken.objects.create(user)
+        # return Response({
+        #     "user": self.get_serializer(user).data,
+        #     "token": token
+        # })
+        return super().post(request, *args, **kwargs)
+    def get_post_response_data(self, request, token, instance):
+        UserSerializerData = self.get_serializer(request.user).data
+
+        data = {
+            'expiry': self.format_expiry_datetime(instance.expiry),
+            'token': token
+        }
+        if UserSerializerData is not None:
+            data["user"] = UserSerializerData
+        return data
